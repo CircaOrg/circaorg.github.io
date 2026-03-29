@@ -18,7 +18,7 @@ import './AgentChat.css';
 const OPENROUTER_API_KEY    = import.meta.env.VITE_OPENROUTER_API_KEY as string | undefined;
 const ELEVENLABS_API_KEY    = import.meta.env.VITE_ELEVENLABS_API_KEY as string | undefined;
 const ELEVENLABS_VOICE_ID   = (import.meta.env.VITE_ELEVENLABS_VOICE_ID as string | undefined) ?? '21m00Tcm4TlvDq8ikWAM';
-const MODEL                 = 'moonshotai/kimi-k2';
+const MODEL                 = 'moonshotai/kimi-k2-thinking';
 
 // ---------------------------------------------------------------------------
 // Types
