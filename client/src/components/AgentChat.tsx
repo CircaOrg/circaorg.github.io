@@ -309,7 +309,6 @@ export default function AgentChat({ onClose }: AgentChatProps) {
   const [isRecording, setIsRecording] = useState(false);
   const audioRef     = useRef<HTMLAudioElement | null>(null);
   const speechRecRef = useRef<any>(null);
-  const shouldListenRef = useRef(false);
   // Snapshot of input text at the moment recording starts, so spoken
   // words are appended rather than overwriting anything already typed.
   const inputSnapshotRef = useRef<string>('');
@@ -369,17 +368,16 @@ export default function AgentChat({ onClose }: AgentChatProps) {
     const SR = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
     if (!SR) { alert('Speech recognition not supported in this browser.'); return; }
 
+    // Snapshot what is already typed so we append speech to it
     inputSnapshotRef.current = input.trim();
-    shouldListenRef.current = true;
-    setIsRecording(true);
 
     const rec = new SR();
     rec.lang = language !== 'en' ? language : 'en-US';
     rec.interimResults = true;
-    // We handle continuity ourselves via onend restart, so 'false' is often safer across browsers
-    rec.continuous = false; 
+    rec.continuous = true; // keep listening until user explicitly stops
 
     rec.onresult = (e: any) => {
+      // Concatenate ALL result segments (handles multi-sentence sessions)
       let spoken = '';
       for (let i = 0; i < e.results.length; i++) {
         spoken += e.results[i][0].transcript;
@@ -389,36 +387,28 @@ export default function AgentChat({ onClose }: AgentChatProps) {
     };
 
     rec.onend = () => {
-      if (shouldListenRef.current) {
-        // Update snapshot to carry over whatever was just captured, avoiding duplicate appending
-        inputSnapshotRef.current = input.trim();
-        try { rec.start(); } catch {}
-      } else {
-        speechRecRef.current = null;
-        setIsRecording(false);
-      }
+      speechRecRef.current = null;
+      setIsRecording(false);
     };
-
     rec.onerror = (e: any) => {
-      if (e.error !== 'aborted' && e.error !== 'no-speech') {
-        console.error('SpeechRecognition error', e.error);
-      }
-      // onend will fire immediately after onerror in most cases
+      if (e.error === 'no-speech') return; // Ignore silence errors
+      if (e.error !== 'aborted') console.error('SpeechRecognition error', e.error);
+      speechRecRef.current = null;
+      setIsRecording(false);
     };
 
     try {
       rec.start();
       speechRecRef.current = rec;
+      setIsRecording(true);
     } catch (err) {
       console.error('Failed to start speech recognition', err);
-      shouldListenRef.current = false;
-      setIsRecording(false);
     }
   }, [language, input]);
 
   const stopRecording = useCallback(() => {
-    shouldListenRef.current = false;
     if (speechRecRef.current) {
+      // stop() triggers a final onresult + onend, preserving the transcript
       speechRecRef.current.stop();
     }
   }, []);
@@ -434,12 +424,11 @@ export default function AgentChat({ onClose }: AgentChatProps) {
     if (!text.trim() || loading) return;
 
     // Stop recording before sending so no late onresult overwrites cleared input
-    shouldListenRef.current = false;
     if (speechRecRef.current) {
       speechRecRef.current.abort();
       speechRecRef.current = null;
+      setIsRecording(false);
     }
-    setIsRecording(false);
 
     const userMsg: TextMessage = { id: uid(), role: 'user', type: 'text', content: text.trim() };
     setMessages((prev) => [...prev, userMsg]);
