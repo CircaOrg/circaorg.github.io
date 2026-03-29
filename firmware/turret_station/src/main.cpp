@@ -17,6 +17,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <ESP32Servo.h>
+#include <esp_now.h>
 #include <math.h>
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
@@ -46,6 +47,67 @@
 
 // ── SoftAP ───────────────────────────────────────────────────────────────────
 #define AP_SSID "Turret-ESP32"
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ESP-NOW — node readings storage
+// ─────────────────────────────────────────────────────────────────────────────
+
+#define MAX_NODES 16
+
+typedef struct __attribute__((packed)) {
+  char  id[16];     // node ID string
+  float soil_pct;   // 0–100 %
+  bool  soil_wet;   // true = DO pin LOW (wet)
+} NodePacket;
+
+struct NodeReading {
+  char     mac[18];         // "AA:BB:CC:DD:EE:FF"
+  char     id[16];
+  float    soil_pct;
+  bool     soil_wet;
+  uint32_t last_seen_ms;
+  bool     active;
+};
+
+static NodeReading nodeReadings[MAX_NODES] = {};
+static portMUX_TYPE nodeMux = portMUX_INITIALIZER_UNLOCKED;
+
+// Find or allocate a slot for this MAC
+static int findOrAllocNode(const char *mac) {
+  for (int i = 0; i < MAX_NODES; i++) {
+    if (nodeReadings[i].active && strcmp(nodeReadings[i].mac, mac) == 0) return i;
+  }
+  for (int i = 0; i < MAX_NODES; i++) {
+    if (!nodeReadings[i].active) return i;
+  }
+  return -1; // full — replace oldest
+}
+
+void IRAM_ATTR onNodeReceive(const uint8_t *mac, const uint8_t *data, int len) {
+  if (len < (int)sizeof(NodePacket)) return;
+
+  char macStr[18];
+  snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  NodePacket pkt;
+  memcpy(&pkt, data, sizeof(NodePacket));
+
+  portENTER_CRITICAL_ISR(&nodeMux);
+  int idx = findOrAllocNode(macStr);
+  if (idx >= 0) {
+    strlcpy(nodeReadings[idx].mac,     macStr,   sizeof(nodeReadings[idx].mac));
+    strlcpy(nodeReadings[idx].id,      pkt.id,   sizeof(nodeReadings[idx].id));
+    nodeReadings[idx].soil_pct     = pkt.soil_pct;
+    nodeReadings[idx].soil_wet     = pkt.soil_wet;
+    nodeReadings[idx].last_seen_ms = millis();
+    nodeReadings[idx].active       = true;
+  }
+  portEXIT_CRITICAL_ISR(&nodeMux);
+
+  Serial.printf("[ESP-NOW] Node %s (%s) — soil=%.1f%% wet=%s\n",
+                pkt.id, macStr, pkt.soil_pct, pkt.soil_wet ? "YES" : "NO");
+}
 
 // ── Objects ───────────────────────────────────────────────────────────────────
 Servo      turretServo;
@@ -252,6 +314,30 @@ void handleNotFound() {
   server.send(404, "application/json", "{\"error\":\"not found\",\"path\":\"" + server.uri() + "\"}");
 }
 
+void handleNodes() {
+  addCORS();
+  String json = "{\"nodes\":[";
+  bool first = true;
+  uint32_t now = millis();
+
+  portENTER_CRITICAL(&nodeMux);
+  for (int i = 0; i < MAX_NODES; i++) {
+    if (!nodeReadings[i].active) continue;
+    uint32_t age_s = (now - nodeReadings[i].last_seen_ms) / 1000;
+    if (!first) json += ",";
+    json += "{\"mac\":\"" + String(nodeReadings[i].mac) + "\","
+            "\"id\":\""   + String(nodeReadings[i].id)  + "\","
+            "\"soil_pct\":" + String(nodeReadings[i].soil_pct, 1) + ","
+            "\"soil_wet\":"  + String(nodeReadings[i].soil_wet ? "true" : "false") + ","
+            "\"last_seen_s\":" + String(age_s) + "}";
+    first = false;
+  }
+  portEXIT_CRITICAL(&nodeMux);
+
+  json += "]}";
+  server.send(200, "application/json", json);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Setup
 // ─────────────────────────────────────────────────────────────────────────────
@@ -287,6 +373,14 @@ void setup() {
   Serial.print("[WiFi] AP \"" AP_SSID "\" started — IP: ");
   Serial.println(WiFi.softAPIP());
 
+  // ESP-NOW — receive sensor packets from nodes
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("[ESP-NOW] Init failed — node readings unavailable");
+  } else {
+    esp_now_register_recv_cb(onNodeReceive);
+    Serial.println("[ESP-NOW] Receiver ready");
+  }
+
   // HTTP routes
   server.on("/",                  HTTP_GET,     handleRoot);
   server.on("/api/servo",         HTTP_GET,     handleServo);
@@ -296,6 +390,7 @@ void setup() {
   server.on("/api/aim",           HTTP_GET,     handleAim);
   server.on("/api/pump/on",       HTTP_GET,     handlePumpOn);
   server.on("/api/pump/off",      HTTP_GET,     handlePumpOff);
+  server.on("/api/nodes",         HTTP_GET,     handleNodes);
   // CORS preflight — browsers send OPTIONS before cross-origin GET
   server.on("/",                  HTTP_OPTIONS, [](){ addCORS(); server.send(204); });
   server.on("/api/servo",         HTTP_OPTIONS, [](){ addCORS(); server.send(204); });
@@ -305,6 +400,7 @@ void setup() {
   server.on("/api/aim",           HTTP_OPTIONS, [](){ addCORS(); server.send(204); });
   server.on("/api/pump/on",       HTTP_OPTIONS, [](){ addCORS(); server.send(204); });
   server.on("/api/pump/off",      HTTP_OPTIONS, [](){ addCORS(); server.send(204); });
+  server.on("/api/nodes",         HTTP_OPTIONS, [](){ addCORS(); server.send(204); });
   server.onNotFound(handleNotFound);
 
   server.begin();

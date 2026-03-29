@@ -7,7 +7,7 @@ import {
   SERVO_MIN, SERVO_MAX, SERVO_HOME,
   STEPS_PER_REV, PUMP_MAX_MS,
 } from '../lib/turretApi';
-import type { HardwareResult, StepperDir } from '../lib/turretApi';
+import type { HardwareResult, StepperDir, NodeReading } from '../lib/turretApi';
 import './ControlPage.css';
 
 const SERVER = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
@@ -393,6 +393,9 @@ function TurretTab() {
 
           {/* ── Pump ── */}
           <PumpPanel api={api} />
+
+          {/* ── Node sensor readings ── */}
+          <NodeReadingsPanel api={api} />
         </>
       )}
     </div>
@@ -813,6 +816,75 @@ function HwResult({ result }: { result: HardwareResult | null }) {
       {result.ok ? '✓' : '✗'} {result.ok ? 'OK' : `Error ${result.status}`}
       {result.body ? ` — ${result.body.slice(0, 80)}` : ''}
     </p>
+  );
+}
+
+// ── Node Readings Panel ─────────────────────────────────────
+function NodeReadingsPanel({ api }: { api: TurretApiClient }) {
+  const [nodes, setNodes] = useState<NodeReading[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [lastFetch, setLastFetch] = useState<Date | null>(null);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const data = await api.fetchNodes();
+    setNodes(data);
+    setLastFetch(new Date());
+    setLoading(false);
+  }, [api]);
+
+  // Auto-refresh every 35 s (slightly longer than node sleep interval)
+  useEffect(() => {
+    refresh();
+    const id = setInterval(refresh, 35_000);
+    return () => clearInterval(id);
+  }, [refresh]);
+
+  return (
+    <div className="hw-panel">
+      <div className="hw-panel-header">
+        <span className="hw-panel-title">Sensor Nodes</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {lastFetch && (
+            <span className="hw-result hw-result--ok" style={{ fontSize: 10 }}>
+              {lastFetch.toLocaleTimeString()}
+            </span>
+          )}
+          <button className="btn-ghost hw-ping-btn" onClick={refresh} disabled={loading}>
+            {loading ? <span className="spinner" /> : '↻'}
+          </button>
+        </div>
+      </div>
+
+      {nodes.length === 0 ? (
+        <p className="hw-empty-hint">
+          No nodes yet — flash a node and wait up to 30 s for its first reading.
+        </p>
+      ) : (
+        <div className="node-readings-grid">
+          {nodes.map((n) => (
+            <div key={n.mac} className={`node-card ${n.soil_wet ? 'node-card--wet' : 'node-card--dry'}`}>
+              <div className="node-card-header">
+                <span className="node-card-id">{n.id}</span>
+                <span className={`hw-badge ${n.last_seen_s < 120 ? 'hw-badge--ok' : 'hw-badge--fail'}`}>
+                  {n.last_seen_s < 60 ? `${n.last_seen_s}s ago` : `${Math.floor(n.last_seen_s / 60)}m ago`}
+                </span>
+              </div>
+              <div className="node-soil-bar-wrap">
+                <div className="node-soil-bar" style={{ width: `${n.soil_pct}%` }} />
+              </div>
+              <div className="node-card-row">
+                <span className="node-soil-val">{n.soil_pct.toFixed(1)}%</span>
+                <span className={`node-wet-badge ${n.soil_wet ? 'wet' : 'dry'}`}>
+                  {n.soil_wet ? 'WET' : 'DRY'}
+                </span>
+              </div>
+              <span className="node-mac mono">{n.mac}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

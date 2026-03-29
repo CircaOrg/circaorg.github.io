@@ -147,8 +147,30 @@
 
 /* Panel sections */
 .hw-panel { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.hw-panel-header { display: flex; align-items: center; justify-content: space-between; }
 .hw-panel-title { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--black); }
 .hw-panel-sub { font-size: 12px; color: var(--gray-500); margin-top: -6px; line-height: 1.4; }
+.hw-empty-hint { font-size: 12px; color: var(--gray-400); text-align: center; padding: 12px 0; line-height: 1.5; }
+
+/* Node readings grid */
+.node-readings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.node-card {
+  border: 1px solid var(--gray-200); border-radius: 8px;
+  padding: 12px; display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 0.2s;
+}
+.node-card--wet  { border-color: #3182ce; background: #ebf8ff; }
+.node-card--dry  { border-color: var(--gray-200); }
+.node-card-header { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.node-card-id { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.node-card-row { display: flex; align-items: center; justify-content: space-between; }
+.node-soil-bar-wrap { height: 6px; background: var(--gray-100); border-radius: 3px; overflow: hidden; }
+.node-soil-bar { height: 100%; background: #3182ce; border-radius: 3px; transition: width 0.4s ease; }
+.node-soil-val { font-size: 20px; font-weight: 700; color: var(--black); }
+.node-wet-badge { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 100px; }
+.node-wet-badge.wet { background: #bee3f8; color: #2b6cb0; }
+.node-wet-badge.dry { background: var(--gray-100); color: var(--gray-500); }
+.node-mac { font-size: 9px; color: var(--gray-300); }
 .hw-range-hint { font-size: 11px; color: var(--gray-400); font-weight: 400; }
 
 /* Button rows */

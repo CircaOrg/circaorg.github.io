@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.8 — 2026-03-28
+
+- **Sensor node firmware** (`firmware/node/node.ino`): Complete rewrite using **ESP-NOW** instead of MQTT. Each node wakes, reads the soil moisture sensor (GPIO 18 = DO digital threshold, GPIO 34 = AO analog), sends a `NodePacket` to the base station via ESP-NOW broadcast, then deep-sleeps for 30 s. No WiFi connection required — transmits on the SoftAP's channel (1). ⚠ AO wire must be on **GPIO 34**, not GPIO 19 (which is not ADC-capable).
+- **Base station firmware** (`firmware/turret_station/src/main.cpp`): Added ESP-NOW receiver alongside the existing SoftAP + HTTP server. Receives `NodePacket` structs from any nearby node, stores latest reading per MAC (up to 16 nodes). New `GET /api/nodes` HTTP endpoint returns all stored readings as JSON with `id`, `mac`, `soil_pct`, `soil_wet`, `last_seen_s`.
+- **Client — Node Readings Panel** (`ControlPage.tsx`): `TurretApiClient` gains `fetchNodes()` method. New `NodeReadingsPanel` component in the Turret tab polls `/api/nodes` every 35 s (auto) and shows a card per node with moisture bar, percentage, WET/DRY badge, and last-seen time.
+
 ## 0.5.7 — 2026-03-28
 
 - **Repository:** Root `.gitignore` added (`node_modules`, PlatformIO `.pio`, build outputs, local env files, `server/data/stations.json`). Prepares the tree for a clean public GitHub push.

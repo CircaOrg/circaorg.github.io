@@ -18,6 +18,14 @@ export interface HardwareResult {
   body: string;
 }
 
+export interface NodeReading {
+  mac: string;
+  id: string;
+  soil_pct: number;
+  soil_wet: boolean;
+  last_seen_s: number;
+}
+
 /**
  * Client for the ESP32 turret HTTP API.
  *
@@ -112,5 +120,17 @@ export class TurretApiClient {
   /** Turn pump relay off. */
   pumpOff(): Promise<HardwareResult> {
     return this.call('/api/pump/off');
+  }
+
+  /** Fetch latest readings from all connected sensor nodes. */
+  async fetchNodes(): Promise<NodeReading[]> {
+    const r = await this.call('/api/nodes');
+    if (!r.ok) return [];
+    try {
+      const data = JSON.parse(r.body) as { nodes: NodeReading[] };
+      return data.nodes ?? [];
+    } catch {
+      return [];
+    }
   }
 }
