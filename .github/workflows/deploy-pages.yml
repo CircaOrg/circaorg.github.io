@@ -2,7 +2,8 @@ name: Deploy Client To GitHub Pages
 
 on:
   push:
-    branches: [deploy/simulated-dashboard]
+    branches:
+      - deploy/simulated-*
   workflow_dispatch:
 
 permissions:
