@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { connectSocket } from './lib/socket';
+import { useSimulatedData } from './hooks/useSimulatedData'; // ← TEMP: remove to restore real data
 import AppShell from './components/AppShell';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
@@ -10,6 +11,7 @@ import PredictionPage from './pages/PredictionPage';
 import './App.css';
 
 export default function App() {
+  useSimulatedData(); // ← TEMP: comment out to restore real data
   useEffect(() => {
     connectSocket();
   }, []);
