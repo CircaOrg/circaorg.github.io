@@ -854,6 +854,972 @@
                                                  "Count":  22
                                              }
                            },
-    "chart_by_cluster":  {}
+    "chart_by_cluster":  {
+    "cluster_1": {
+        "cluster_id": "cluster_1",
+        "model_version": "cluster_1_vwc_tomorrow_cluster_1_vwc_tomorrow_2026-03-28",
+        "split_ratio": 0.8,
+        "split_index": 52,
+        "split_timestamp": "2026-03-13T12:00:00Z",
+        "total_rows": 66,
+        "fallback_used": true,
+        "train_history": [
+            {
+                "timestamp": "2026-01-20T12:00:00Z",
+                "actual_vwc": 89.58
+            },
+            {
+                "timestamp": "2026-01-21T12:00:00Z",
+                "actual_vwc": 84.69
+            },
+            {
+                "timestamp": "2026-01-22T12:00:00Z",
+                "actual_vwc": 83.85
+            },
+            {
+                "timestamp": "2026-01-23T12:00:00Z",
+                "actual_vwc": 93.01
+            },
+            {
+                "timestamp": "2026-01-24T12:00:00Z",
+                "actual_vwc": 93.95
+            },
+            {
+                "timestamp": "2026-01-25T12:00:00Z",
+                "actual_vwc": 89.4
+            },
+            {
+                "timestamp": "2026-01-26T12:00:00Z",
+                "actual_vwc": 89.4
+            },
+            {
+                "timestamp": "2026-01-27T12:00:00Z",
+                "actual_vwc": 86.99
+            },
+            {
+                "timestamp": "2026-01-28T12:00:00Z",
+                "actual_vwc": 83.37
+            },
+            {
+                "timestamp": "2026-01-29T12:00:00Z",
+                "actual_vwc": 80.75
+            },
+            {
+                "timestamp": "2026-01-30T12:00:00Z",
+                "actual_vwc": 86.99
+            },
+            {
+                "timestamp": "2026-01-31T12:00:00Z",
+                "actual_vwc": 92.87
+            },
+            {
+                "timestamp": "2026-02-01T12:00:00Z",
+                "actual_vwc": 92.7
+            },
+            {
+                "timestamp": "2026-02-02T12:00:00Z",
+                "actual_vwc": 90.77
+            },
+            {
+                "timestamp": "2026-02-03T12:00:00Z",
+                "actual_vwc": 91.56
+            },
+            {
+                "timestamp": "2026-02-04T12:00:00Z",
+                "actual_vwc": 89.84
+            },
+            {
+                "timestamp": "2026-02-05T12:00:00Z",
+                "actual_vwc": 92.3
+            },
+            {
+                "timestamp": "2026-02-06T12:00:00Z",
+                "actual_vwc": 90.3
+            },
+            {
+                "timestamp": "2026-02-07T12:00:00Z",
+                "actual_vwc": 94.23
+            },
+            {
+                "timestamp": "2026-02-08T12:00:00Z",
+                "actual_vwc": 92.7
+            },
+            {
+                "timestamp": "2026-02-09T12:00:00Z",
+                "actual_vwc": 88.15
+            },
+            {
+                "timestamp": "2026-02-10T12:00:00Z",
+                "actual_vwc": 85.98
+            },
+            {
+                "timestamp": "2026-02-11T12:00:00Z",
+                "actual_vwc": 89.1
+            },
+            {
+                "timestamp": "2026-02-12T12:00:00Z",
+                "actual_vwc": 88.37
+            },
+            {
+                "timestamp": "2026-02-13T12:00:00Z",
+                "actual_vwc": 92.43
+            },
+            {
+                "timestamp": "2026-02-14T12:00:00Z",
+                "actual_vwc": 89.22
+            },
+            {
+                "timestamp": "2026-02-15T12:00:00Z",
+                "actual_vwc": 91.27
+            },
+            {
+                "timestamp": "2026-02-16T12:00:00Z",
+                "actual_vwc": 90.44
+            },
+            {
+                "timestamp": "2026-02-17T12:00:00Z",
+                "actual_vwc": 91.23
+            },
+            {
+                "timestamp": "2026-02-18T12:00:00Z",
+                "actual_vwc": 90.54
+            },
+            {
+                "timestamp": "2026-02-19T12:00:00Z",
+                "actual_vwc": 89.41
+            },
+            {
+                "timestamp": "2026-02-20T12:00:00Z",
+                "actual_vwc": 87.06
+            },
+            {
+                "timestamp": "2026-02-21T12:00:00Z",
+                "actual_vwc": 83.84
+            },
+            {
+                "timestamp": "2026-02-22T12:00:00Z",
+                "actual_vwc": 85.72
+            },
+            {
+                "timestamp": "2026-02-23T12:00:00Z",
+                "actual_vwc": 87.16
+            },
+            {
+                "timestamp": "2026-02-24T12:00:00Z",
+                "actual_vwc": 79.48
+            },
+            {
+                "timestamp": "2026-02-25T12:00:00Z",
+                "actual_vwc": 82.5
+            },
+            {
+                "timestamp": "2026-02-26T12:00:00Z",
+                "actual_vwc": 86.95
+            },
+            {
+                "timestamp": "2026-02-27T12:00:00Z",
+                "actual_vwc": 90.67
+            },
+            {
+                "timestamp": "2026-02-28T12:00:00Z",
+                "actual_vwc": 88.7
+            },
+            {
+                "timestamp": "2026-03-01T12:00:00Z",
+                "actual_vwc": 89.8
+            },
+            {
+                "timestamp": "2026-03-02T12:00:00Z",
+                "actual_vwc": 92.26
+            },
+            {
+                "timestamp": "2026-03-03T12:00:00Z",
+                "actual_vwc": 93.54
+            },
+            {
+                "timestamp": "2026-03-04T12:00:00Z",
+                "actual_vwc": 92.56
+            },
+            {
+                "timestamp": "2026-03-05T12:00:00Z",
+                "actual_vwc": 93.12
+            },
+            {
+                "timestamp": "2026-03-06T12:00:00Z",
+                "actual_vwc": 92.38
+            },
+            {
+                "timestamp": "2026-03-07T12:00:00Z",
+                "actual_vwc": 93.54
+            },
+            {
+                "timestamp": "2026-03-08T12:00:00Z",
+                "actual_vwc": 93.07
+            },
+            {
+                "timestamp": "2026-03-09T12:00:00Z",
+                "actual_vwc": 92.75
+            },
+            {
+                "timestamp": "2026-03-10T12:00:00Z",
+                "actual_vwc": 92.93
+            },
+            {
+                "timestamp": "2026-03-11T12:00:00Z",
+                "actual_vwc": 94.07
+            },
+            {
+                "timestamp": "2026-03-12T12:00:00Z",
+                "actual_vwc": 93.76
+            }
+        ],
+        "test_predictions": [
+            {
+                "timestamp": "2026-03-13T12:00:00Z",
+                "predicted_vwc_tomorrow": 94.15,
+                "actual_vwc_next_day": 93.75,
+                "error": -0.4014,
+                "abs_error": 0.4014
+            },
+            {
+                "timestamp": "2026-03-14T12:00:00Z",
+                "predicted_vwc_tomorrow": 93.66,
+                "actual_vwc_next_day": 93.3,
+                "error": -0.3648,
+                "abs_error": 0.3648
+            },
+            {
+                "timestamp": "2026-03-15T12:00:00Z",
+                "predicted_vwc_tomorrow": 93.15,
+                "actual_vwc_next_day": 93.36,
+                "error": 0.2078,
+                "abs_error": 0.2078
+            },
+            {
+                "timestamp": "2026-03-16T12:00:00Z",
+                "predicted_vwc_tomorrow": 93.15,
+                "actual_vwc_next_day": 92.09,
+                "error": -1.0601,
+                "abs_error": 1.0601
+            },
+            {
+                "timestamp": "2026-03-17T12:00:00Z",
+                "predicted_vwc_tomorrow": 91.6,
+                "actual_vwc_next_day": 90.95,
+                "error": -0.6533,
+                "abs_error": 0.6533
+            },
+            {
+                "timestamp": "2026-03-18T12:00:00Z",
+                "predicted_vwc_tomorrow": 90.11,
+                "actual_vwc_next_day": 88.32,
+                "error": -1.7948,
+                "abs_error": 1.7948
+            },
+            {
+                "timestamp": "2026-03-19T12:00:00Z",
+                "predicted_vwc_tomorrow": 86.69,
+                "actual_vwc_next_day": 84.75,
+                "error": -1.9441,
+                "abs_error": 1.9441
+            },
+            {
+                "timestamp": "2026-03-20T12:00:00Z",
+                "predicted_vwc_tomorrow": 82.28,
+                "actual_vwc_next_day": 75.96,
+                "error": -6.3222,
+                "abs_error": 6.3222
+            },
+            {
+                "timestamp": "2026-03-21T12:00:00Z",
+                "predicted_vwc_tomorrow": 71.11,
+                "actual_vwc_next_day": 56.81,
+                "error": -14.2961,
+                "abs_error": 14.2961
+            },
+            {
+                "timestamp": "2026-03-22T12:00:00Z",
+                "predicted_vwc_tomorrow": 46.48,
+                "actual_vwc_next_day": 42.28,
+                "error": -4.2031,
+                "abs_error": 4.2031
+            },
+            {
+                "timestamp": "2026-03-23T12:00:00Z",
+                "predicted_vwc_tomorrow": 27.62,
+                "actual_vwc_next_day": 32.74,
+                "error": 5.1175,
+                "abs_error": 5.1175
+            },
+            {
+                "timestamp": "2026-03-24T12:00:00Z",
+                "predicted_vwc_tomorrow": 18.32,
+                "actual_vwc_next_day": 25.91,
+                "error": 7.5896,
+                "abs_error": 7.5896
+            },
+            {
+                "timestamp": "2026-03-25T12:00:00Z",
+                "predicted_vwc_tomorrow": 15.69,
+                "actual_vwc_next_day": 19.93,
+                "error": 4.2463,
+                "abs_error": 4.2463
+            },
+            {
+                "timestamp": "2026-03-26T12:00:00Z",
+                "predicted_vwc_tomorrow": 12.54,
+                "actual_vwc_next_day": 15.08,
+                "error": 2.5391,
+                "abs_error": 2.5391
+            }
+        ]
+    },
+    "cluster_2": {
+        "cluster_id": "cluster_2",
+        "model_version": "cluster_2_vwc_tomorrow_cluster_2_vwc_tomorrow_2026-03-28",
+        "split_ratio": 0.8,
+        "split_index": 52,
+        "split_timestamp": "2026-03-13T12:00:00Z",
+        "total_rows": 66,
+        "fallback_used": true,
+        "train_history": [
+            {
+                "timestamp": "2026-01-20T12:00:00Z",
+                "actual_vwc": 80.29
+            },
+            {
+                "timestamp": "2026-01-21T12:00:00Z",
+                "actual_vwc": 79.45
+            },
+            {
+                "timestamp": "2026-01-22T12:00:00Z",
+                "actual_vwc": 74.23
+            },
+            {
+                "timestamp": "2026-01-23T12:00:00Z",
+                "actual_vwc": 77.5
+            },
+            {
+                "timestamp": "2026-01-24T12:00:00Z",
+                "actual_vwc": 82.15
+            },
+            {
+                "timestamp": "2026-01-25T12:00:00Z",
+                "actual_vwc": 82.17
+            },
+            {
+                "timestamp": "2026-01-26T12:00:00Z",
+                "actual_vwc": 82.45
+            },
+            {
+                "timestamp": "2026-01-27T12:00:00Z",
+                "actual_vwc": 83.38
+            },
+            {
+                "timestamp": "2026-01-28T12:00:00Z",
+                "actual_vwc": 84.05
+            },
+            {
+                "timestamp": "2026-01-29T12:00:00Z",
+                "actual_vwc": 83.26
+            },
+            {
+                "timestamp": "2026-01-30T12:00:00Z",
+                "actual_vwc": 84.31
+            },
+            {
+                "timestamp": "2026-01-31T12:00:00Z",
+                "actual_vwc": 84.32
+            },
+            {
+                "timestamp": "2026-02-01T12:00:00Z",
+                "actual_vwc": 84.97
+            },
+            {
+                "timestamp": "2026-02-02T12:00:00Z",
+                "actual_vwc": 86.43
+            },
+            {
+                "timestamp": "2026-02-03T12:00:00Z",
+                "actual_vwc": 86.92
+            },
+            {
+                "timestamp": "2026-02-04T12:00:00Z",
+                "actual_vwc": 87.39
+            },
+            {
+                "timestamp": "2026-02-05T12:00:00Z",
+                "actual_vwc": 86.6
+            },
+            {
+                "timestamp": "2026-02-06T12:00:00Z",
+                "actual_vwc": 85.59
+            },
+            {
+                "timestamp": "2026-02-07T12:00:00Z",
+                "actual_vwc": 83.68
+            },
+            {
+                "timestamp": "2026-02-08T12:00:00Z",
+                "actual_vwc": 80.63
+            },
+            {
+                "timestamp": "2026-02-09T12:00:00Z",
+                "actual_vwc": 69.53
+            },
+            {
+                "timestamp": "2026-02-10T12:00:00Z",
+                "actual_vwc": 46.57
+            },
+            {
+                "timestamp": "2026-02-11T12:00:00Z",
+                "actual_vwc": 31.86
+            },
+            {
+                "timestamp": "2026-02-12T12:00:00Z",
+                "actual_vwc": 24.75
+            },
+            {
+                "timestamp": "2026-02-13T12:00:00Z",
+                "actual_vwc": 18.14
+            },
+            {
+                "timestamp": "2026-02-14T12:00:00Z",
+                "actual_vwc": 13.99
+            },
+            {
+                "timestamp": "2026-02-15T12:00:00Z",
+                "actual_vwc": 5.62
+            },
+            {
+                "timestamp": "2026-02-16T12:00:00Z",
+                "actual_vwc": 3.84
+            },
+            {
+                "timestamp": "2026-02-17T12:00:00Z",
+                "actual_vwc": 9.41
+            },
+            {
+                "timestamp": "2026-02-18T12:00:00Z",
+                "actual_vwc": 8.95
+            },
+            {
+                "timestamp": "2026-02-19T12:00:00Z",
+                "actual_vwc": 8.65
+            },
+            {
+                "timestamp": "2026-02-20T12:00:00Z",
+                "actual_vwc": 8.44
+            },
+            {
+                "timestamp": "2026-02-21T12:00:00Z",
+                "actual_vwc": 7.99
+            },
+            {
+                "timestamp": "2026-02-22T12:00:00Z",
+                "actual_vwc": 7.68
+            },
+            {
+                "timestamp": "2026-02-23T12:00:00Z",
+                "actual_vwc": 7.4
+            },
+            {
+                "timestamp": "2026-02-24T12:00:00Z",
+                "actual_vwc": 7.04
+            },
+            {
+                "timestamp": "2026-02-25T12:00:00Z",
+                "actual_vwc": 6.65
+            },
+            {
+                "timestamp": "2026-02-26T12:00:00Z",
+                "actual_vwc": 6.22
+            },
+            {
+                "timestamp": "2026-02-27T12:00:00Z",
+                "actual_vwc": 5.78
+            },
+            {
+                "timestamp": "2026-02-28T12:00:00Z",
+                "actual_vwc": 5.42
+            },
+            {
+                "timestamp": "2026-03-01T12:00:00Z",
+                "actual_vwc": 5.05
+            },
+            {
+                "timestamp": "2026-03-02T12:00:00Z",
+                "actual_vwc": 4.65
+            },
+            {
+                "timestamp": "2026-03-03T12:00:00Z",
+                "actual_vwc": 4.26
+            },
+            {
+                "timestamp": "2026-03-04T12:00:00Z",
+                "actual_vwc": 3.91
+            },
+            {
+                "timestamp": "2026-03-05T12:00:00Z",
+                "actual_vwc": 3.61
+            },
+            {
+                "timestamp": "2026-03-06T12:00:00Z",
+                "actual_vwc": 3.32
+            },
+            {
+                "timestamp": "2026-03-07T12:00:00Z",
+                "actual_vwc": 3.16
+            },
+            {
+                "timestamp": "2026-03-08T12:00:00Z",
+                "actual_vwc": 2.96
+            },
+            {
+                "timestamp": "2026-03-09T12:00:00Z",
+                "actual_vwc": 2.79
+            },
+            {
+                "timestamp": "2026-03-10T12:00:00Z",
+                "actual_vwc": 2.6
+            },
+            {
+                "timestamp": "2026-03-11T12:00:00Z",
+                "actual_vwc": 2.48
+            },
+            {
+                "timestamp": "2026-03-12T12:00:00Z",
+                "actual_vwc": 2.37
+            }
+        ],
+        "test_predictions": [
+            {
+                "timestamp": "2026-03-13T12:00:00Z",
+                "predicted_vwc_tomorrow": 2.14,
+                "actual_vwc_next_day": 2.14,
+                "error": 0.0006,
+                "abs_error": 0.0006
+            },
+            {
+                "timestamp": "2026-03-14T12:00:00Z",
+                "predicted_vwc_tomorrow": 2.03,
+                "actual_vwc_next_day": 2.05,
+                "error": 0.0277,
+                "abs_error": 0.0277
+            },
+            {
+                "timestamp": "2026-03-15T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.95,
+                "actual_vwc_next_day": 1.92,
+                "error": -0.0267,
+                "abs_error": 0.0267
+            },
+            {
+                "timestamp": "2026-03-16T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.81,
+                "actual_vwc_next_day": 1.89,
+                "error": 0.0795,
+                "abs_error": 0.0795
+            },
+            {
+                "timestamp": "2026-03-17T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.8,
+                "actual_vwc_next_day": 1.84,
+                "error": 0.0339,
+                "abs_error": 0.0339
+            },
+            {
+                "timestamp": "2026-03-18T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.77,
+                "actual_vwc_next_day": 1.77,
+                "error": 0.0004,
+                "abs_error": 0.0004
+            },
+            {
+                "timestamp": "2026-03-19T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.72,
+                "actual_vwc_next_day": 1.66,
+                "error": -0.0617,
+                "abs_error": 0.0617
+            },
+            {
+                "timestamp": "2026-03-20T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.58,
+                "actual_vwc_next_day": 1.55,
+                "error": -0.0349,
+                "abs_error": 0.0349
+            },
+            {
+                "timestamp": "2026-03-21T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.45,
+                "actual_vwc_next_day": 1.42,
+                "error": -0.0266,
+                "abs_error": 0.0266
+            },
+            {
+                "timestamp": "2026-03-22T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.31,
+                "actual_vwc_next_day": 1.36,
+                "error": 0.0518,
+                "abs_error": 0.0518
+            },
+            {
+                "timestamp": "2026-03-23T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.26,
+                "actual_vwc_next_day": 1.27,
+                "error": 0.0138,
+                "abs_error": 0.0138
+            },
+            {
+                "timestamp": "2026-03-24T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.18,
+                "actual_vwc_next_day": 1.23,
+                "error": 0.0518,
+                "abs_error": 0.0518
+            },
+            {
+                "timestamp": "2026-03-25T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.17,
+                "actual_vwc_next_day": 1.21,
+                "error": 0.0394,
+                "abs_error": 0.0394
+            },
+            {
+                "timestamp": "2026-03-26T12:00:00Z",
+                "predicted_vwc_tomorrow": 1.16,
+                "actual_vwc_next_day": 1.19,
+                "error": 0.0286,
+                "abs_error": 0.0286
+            }
+        ]
+    },
+    "cluster_3": {
+        "cluster_id": "cluster_3",
+        "model_version": "cluster_3_vwc_tomorrow_cluster_3_vwc_tomorrow_2026-03-28",
+        "split_ratio": 0.8,
+        "split_index": 54,
+        "split_timestamp": "2026-03-13T12:00:00Z",
+        "total_rows": 68,
+        "fallback_used": true,
+        "train_history": [
+            {
+                "timestamp": "2026-01-18T12:00:00Z",
+                "actual_vwc": 0.91
+            },
+            {
+                "timestamp": "2026-01-19T12:00:00Z",
+                "actual_vwc": 0.86
+            },
+            {
+                "timestamp": "2026-01-20T12:00:00Z",
+                "actual_vwc": 0.83
+            },
+            {
+                "timestamp": "2026-01-21T12:00:00Z",
+                "actual_vwc": 0.79
+            },
+            {
+                "timestamp": "2026-01-22T12:00:00Z",
+                "actual_vwc": 0.76
+            },
+            {
+                "timestamp": "2026-01-23T12:00:00Z",
+                "actual_vwc": 0.72
+            },
+            {
+                "timestamp": "2026-01-24T12:00:00Z",
+                "actual_vwc": 0.71
+            },
+            {
+                "timestamp": "2026-01-25T12:00:00Z",
+                "actual_vwc": 0.73
+            },
+            {
+                "timestamp": "2026-01-26T12:00:00Z",
+                "actual_vwc": 0.72
+            },
+            {
+                "timestamp": "2026-01-27T12:00:00Z",
+                "actual_vwc": 0.69
+            },
+            {
+                "timestamp": "2026-01-28T12:00:00Z",
+                "actual_vwc": 0.67
+            },
+            {
+                "timestamp": "2026-01-29T12:00:00Z",
+                "actual_vwc": 0.64
+            },
+            {
+                "timestamp": "2026-01-30T12:00:00Z",
+                "actual_vwc": 0.6
+            },
+            {
+                "timestamp": "2026-01-31T12:00:00Z",
+                "actual_vwc": 0.57
+            },
+            {
+                "timestamp": "2026-02-01T12:00:00Z",
+                "actual_vwc": 0.55
+            },
+            {
+                "timestamp": "2026-02-02T12:00:00Z",
+                "actual_vwc": 0.52
+            },
+            {
+                "timestamp": "2026-02-03T12:00:00Z",
+                "actual_vwc": 0.49
+            },
+            {
+                "timestamp": "2026-02-04T12:00:00Z",
+                "actual_vwc": 0.46
+            },
+            {
+                "timestamp": "2026-02-05T12:00:00Z",
+                "actual_vwc": 0.44
+            },
+            {
+                "timestamp": "2026-02-06T12:00:00Z",
+                "actual_vwc": 0.24
+            },
+            {
+                "timestamp": "2026-02-07T12:00:00Z",
+                "actual_vwc": 0.21
+            },
+            {
+                "timestamp": "2026-02-08T12:00:00Z",
+                "actual_vwc": 0.21
+            },
+            {
+                "timestamp": "2026-02-09T12:00:00Z",
+                "actual_vwc": 0.21
+            },
+            {
+                "timestamp": "2026-02-10T12:00:00Z",
+                "actual_vwc": 0.23
+            },
+            {
+                "timestamp": "2026-02-11T12:00:00Z",
+                "actual_vwc": 0.25
+            },
+            {
+                "timestamp": "2026-02-12T12:00:00Z",
+                "actual_vwc": 0.27
+            },
+            {
+                "timestamp": "2026-02-13T12:00:00Z",
+                "actual_vwc": 0.27
+            },
+            {
+                "timestamp": "2026-02-14T12:00:00Z",
+                "actual_vwc": 0.24
+            },
+            {
+                "timestamp": "2026-02-15T12:00:00Z",
+                "actual_vwc": 0.21
+            },
+            {
+                "timestamp": "2026-02-16T12:00:00Z",
+                "actual_vwc": 0.21
+            },
+            {
+                "timestamp": "2026-02-17T12:00:00Z",
+                "actual_vwc": 0.22
+            },
+            {
+                "timestamp": "2026-02-18T12:00:00Z",
+                "actual_vwc": 0.21
+            },
+            {
+                "timestamp": "2026-02-19T12:00:00Z",
+                "actual_vwc": 0.19
+            },
+            {
+                "timestamp": "2026-02-20T12:00:00Z",
+                "actual_vwc": 0.17
+            },
+            {
+                "timestamp": "2026-02-21T12:00:00Z",
+                "actual_vwc": 0.19
+            },
+            {
+                "timestamp": "2026-02-22T12:00:00Z",
+                "actual_vwc": 0.2
+            },
+            {
+                "timestamp": "2026-02-23T12:00:00Z",
+                "actual_vwc": 0.2
+            },
+            {
+                "timestamp": "2026-02-24T12:00:00Z",
+                "actual_vwc": 0.2
+            },
+            {
+                "timestamp": "2026-02-25T12:00:00Z",
+                "actual_vwc": 0.19
+            },
+            {
+                "timestamp": "2026-02-26T12:00:00Z",
+                "actual_vwc": 0.19
+            },
+            {
+                "timestamp": "2026-02-27T12:00:00Z",
+                "actual_vwc": 0.18
+            },
+            {
+                "timestamp": "2026-02-28T12:00:00Z",
+                "actual_vwc": 0.18
+            },
+            {
+                "timestamp": "2026-03-01T12:00:00Z",
+                "actual_vwc": 0.17
+            },
+            {
+                "timestamp": "2026-03-02T12:00:00Z",
+                "actual_vwc": 0.16
+            },
+            {
+                "timestamp": "2026-03-03T12:00:00Z",
+                "actual_vwc": 0.13
+            },
+            {
+                "timestamp": "2026-03-04T12:00:00Z",
+                "actual_vwc": 0.1
+            },
+            {
+                "timestamp": "2026-03-05T12:00:00Z",
+                "actual_vwc": 0.08
+            },
+            {
+                "timestamp": "2026-03-06T12:00:00Z",
+                "actual_vwc": 0.08
+            },
+            {
+                "timestamp": "2026-03-07T12:00:00Z",
+                "actual_vwc": 0.07
+            },
+            {
+                "timestamp": "2026-03-08T12:00:00Z",
+                "actual_vwc": 0.08
+            },
+            {
+                "timestamp": "2026-03-09T12:00:00Z",
+                "actual_vwc": 0.08
+            },
+            {
+                "timestamp": "2026-03-10T12:00:00Z",
+                "actual_vwc": 0.09
+            },
+            {
+                "timestamp": "2026-03-11T12:00:00Z",
+                "actual_vwc": 0.09
+            },
+            {
+                "timestamp": "2026-03-12T12:00:00Z",
+                "actual_vwc": 0.09
+            }
+        ],
+        "test_predictions": [
+            {
+                "timestamp": "2026-03-13T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.08,
+                "actual_vwc_next_day": 0.07,
+                "error": -0.0029,
+                "abs_error": 0.0029
+            },
+            {
+                "timestamp": "2026-03-14T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.06,
+                "actual_vwc_next_day": 0.07,
+                "error": 0.0026,
+                "abs_error": 0.0026
+            },
+            {
+                "timestamp": "2026-03-15T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.06,
+                "actual_vwc_next_day": 0.06,
+                "error": 0.0003,
+                "abs_error": 0.0003
+            },
+            {
+                "timestamp": "2026-03-16T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.05,
+                "actual_vwc_next_day": 0.05,
+                "error": 0.0014,
+                "abs_error": 0.0014
+            },
+            {
+                "timestamp": "2026-03-17T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.05,
+                "actual_vwc_next_day": 0.05,
+                "error": -0.002,
+                "abs_error": 0.002
+            },
+            {
+                "timestamp": "2026-03-18T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.04,
+                "actual_vwc_next_day": 0.05,
+                "error": 0.0062,
+                "abs_error": 0.0062
+            },
+            {
+                "timestamp": "2026-03-19T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.04,
+                "actual_vwc_next_day": 0.03,
+                "error": -0.0081,
+                "abs_error": 0.0081
+            },
+            {
+                "timestamp": "2026-03-20T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.03,
+                "actual_vwc_next_day": 0.03,
+                "error": -0.002,
+                "abs_error": 0.002
+            },
+            {
+                "timestamp": "2026-03-21T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.02,
+                "actual_vwc_next_day": 0.02,
+                "error": 0.0054,
+                "abs_error": 0.0054
+            },
+            {
+                "timestamp": "2026-03-22T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.01,
+                "actual_vwc_next_day": 0.02,
+                "error": 0.0061,
+                "abs_error": 0.0061
+            },
+            {
+                "timestamp": "2026-03-23T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.02,
+                "actual_vwc_next_day": 0.02,
+                "error": 0.001,
+                "abs_error": 0.001
+            },
+            {
+                "timestamp": "2026-03-24T12:00:00Z",
+                "predicted_vwc_tomorrow": 0.02,
+                "actual_vwc_next_day": 0.01,
+                "error": -0.0103,
+                "abs_error": 0.0103
+            },
+            {
+                "timestamp": "2026-03-25T12:00:00Z",
+                "predicted_vwc_tomorrow": 0,
+                "actual_vwc_next_day": 0.01,
+                "error": 0.0057,
+                "abs_error": 0.0057
+            },
+            {
+                "timestamp": "2026-03-26T12:00:00Z",
+                "predicted_vwc_tomorrow": 0,
+                "actual_vwc_next_day": 0,
+                "error": 0,
+                "abs_error": 0
+            }
+        ]
+    }
+}
 } as const;
 

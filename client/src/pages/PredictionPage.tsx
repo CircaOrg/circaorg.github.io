@@ -85,24 +85,6 @@ interface PredictorAllPredictionsOut {
   fetched_at: string;
 }
 
-interface PredictorSensorReadingOut {
-  id: string;
-  timestamp: string;
-  cluster_id: ClusterId;
-  node_id: string;
-  base_station_id: string | null;
-  vwc: number | null;
-  rh: number | null;
-  t_air: number | null;
-  rain_flag: boolean;
-}
-
-interface PredictorLatestReadingsByCluster {
-  cluster_id: ClusterId;
-  nodes: PredictorSensorReadingOut[];
-  last_updated: string | null;
-}
-
 interface PredictorChartTrainRow {
   timestamp: string;
   actual_vwc: number | null;
@@ -152,15 +134,8 @@ const CLUSTERS: ClusterMeta[] = [
   },
 ];
 
-const NODE_COLORS = ['#0f0e0c', '#8b6914', '#2d7a4f', '#1d6a94', '#c2410c', '#b91c1c'];
-const HOUR_MS = 60 * 60 * 1000;
-const OBSERVED_COUNT = 28;
-const STEP_HOURS = 3;
-const FORECAST_HOURS = 24;
 const POLL_INTERVAL_MS = 30_000;
 const PREDICTOR_BASE_URL = (import.meta.env.VITE_PREDICTOR_URL || 'http://localhost:8000').replace(/\/+$/, '');
-const PREDICTOR_HISTORY_START = '2026-01-01T00:00:00Z';
-const PREDICTOR_HISTORY_LIMIT = '1000';
 const USE_FAKE_PREDICTOR_DATA = (import.meta.env.VITE_USE_FAKE_PREDICTOR_DATA || 'false').toLowerCase() === 'true';
 
 function clamp(value: number, min: number, max: number) {
@@ -179,23 +154,6 @@ function toMillis(timestamp: string) {
 
 function formatTime(ts: string) {
   return format(new Date(ts), 'MMM d, HH:mm');
-}
-
-function formatNodeLabel(nodeId: string) {
-  return nodeId
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function colorForNode(nodeId: string, index: number) {
-  let hash = 0;
-  for (const ch of nodeId) {
-    hash = (hash * 31 + ch.charCodeAt(0)) | 0;
-  }
-  const paletteIndex = Math.abs(hash || index) % NODE_COLORS.length;
-  return NODE_COLORS[paletteIndex];
 }
 
 function average(values: Array<number | null | undefined>, places = 1): number | null {
@@ -277,8 +235,6 @@ async function fetchPredictionChartForCluster(clusterId: ClusterId): Promise<Pre
  */
 function getSnapshotClusterBundle(clusterId: ClusterId): {
   prediction: PredictorPredictionOut;
-  history: PredictorSensorReadingOut[];
-  latestForCluster: PredictorSensorReadingOut[];
   chartSplit: PredictorChartOut | null;
 } {
   const predictionRows = snapshotArray<PredictorPredictionOut>(
@@ -290,13 +246,6 @@ function getSnapshotClusterBundle(clusterId: ClusterId): {
     throw new Error(`Snapshot is missing prediction for ${clusterId}.`);
   }
 
-  const latestByCluster = snapshotArray<PredictorLatestReadingsByCluster>(
-    PREDICTOR_REAL_SNAPSHOT.sensors_latest,
-  );
-  const latestForCluster = latestByCluster.find((row) => row.cluster_id === clusterId)?.nodes ?? [];
-
-  const historyByCluster = PREDICTOR_REAL_SNAPSHOT.history_by_cluster as Record<ClusterId, unknown>;
-  const history = snapshotArray<PredictorSensorReadingOut>(historyByCluster[clusterId]);
   const chartByCluster = (
     PREDICTOR_REAL_SNAPSHOT as unknown as { chart_by_cluster?: Partial<Record<ClusterId, unknown>> }
   ).chart_by_cluster;
@@ -304,181 +253,27 @@ function getSnapshotClusterBundle(clusterId: ClusterId): {
 
   return {
     prediction,
-    history,
-    latestForCluster,
     chartSplit: chartSplit ?? null,
   };
 }
 
 async function fetchClusterBundle(clusterId: ClusterId): Promise<{
   prediction: PredictorPredictionOut;
-  history: PredictorSensorReadingOut[];
-  latestForCluster: PredictorSensorReadingOut[];
   chartSplit: PredictorChartOut | null;
 }> {
   if (USE_FAKE_PREDICTOR_DATA) {
     return getSnapshotClusterBundle(clusterId);
   }
 
-  const historyParams = new URLSearchParams({
-    cluster_id: clusterId,
-    start: PREDICTOR_HISTORY_START,
-    end: new Date().toISOString(),
-    limit: PREDICTOR_HISTORY_LIMIT,
-  });
-
-  // Keep observed history and forecast retrieval separate.
-  const [historyRows, prediction, chartSplit] = await Promise.all([
-    fetchJson<PredictorSensorReadingOut[]>(`${PREDICTOR_BASE_URL}/api/v1/sensors/history?${historyParams.toString()}`),
+  const [prediction, chartSplit] = await Promise.all([
     fetchPredictionForCluster(clusterId),
     fetchPredictionChartForCluster(clusterId).catch(() => null),
   ]);
 
-  const history = [...historyRows].sort((a, b) => toMillis(a.timestamp) - toMillis(b.timestamp));
-  const latestByNode = new Map<string, PredictorSensorReadingOut>();
-  for (const row of history) {
-    latestByNode.set(row.node_id, row);
-  }
-  const latestForCluster = Array.from(latestByNode.values());
-
   return {
     prediction,
-    history,
-    latestForCluster,
     chartSplit,
   };
-}
-
-function buildSeriesFromBackend(
-  historyRows: PredictorSensorReadingOut[],
-  latestRows: PredictorSensorReadingOut[],
-  prediction: PredictorPredictionOut | null,
-): ClusterNodeSeries[] {
-  const allRows = [...historyRows, ...latestRows];
-  const nodeIds = Array.from(new Set(allRows.map((row) => row.node_id))).sort();
-  if (!nodeIds.length) return [];
-
-  // Prediction cutoff is the latest observed timestamp from history.
-  const observedSourceRows = historyRows.length ? historyRows : allRows;
-  const cutoffMs = observedSourceRows.reduce((max, row) => {
-    const ts = toMillis(row.timestamp);
-    if (!Number.isFinite(ts)) return max;
-    if (!Number.isFinite(max)) return ts;
-    return Math.max(max, ts);
-  }, Number.NaN);
-  const anchorMs = Number.isFinite(cutoffMs) ? cutoffMs : Date.now();
-
-  const observedStartMs = anchorMs - (OBSERVED_COUNT - 1) * STEP_HOURS * HOUR_MS;
-  const observedTimeline = Array.from({ length: OBSERVED_COUNT }, (_, idx) => (
-    new Date(observedStartMs + idx * STEP_HOURS * HOUR_MS).toISOString()
-  ));
-
-  const rowsByNode = new Map<string, PredictorSensorReadingOut[]>();
-  for (const nodeId of nodeIds) rowsByNode.set(nodeId, []);
-  for (const row of allRows) {
-    rowsByNode.get(row.node_id)?.push(row);
-  }
-  for (const rows of rowsByNode.values()) {
-    rows.sort((a, b) => toMillis(a.timestamp) - toMillis(b.timestamp));
-  }
-
-  const observedByNode = new Map<string, PredictionPoint[]>();
-  const latestObservedByNode = new Map<string, PredictionPoint | null>();
-
-  for (const nodeId of nodeIds) {
-    const rows = rowsByNode.get(nodeId) ?? [];
-    const points: PredictionPoint[] = [];
-
-    let cursor = 0;
-    let lastReading: PredictorSensorReadingOut | null = null;
-
-    for (const timestamp of observedTimeline) {
-      const bucketMs = toMillis(timestamp);
-
-      while (cursor < rows.length) {
-        const rowTs = toMillis(rows[cursor].timestamp);
-        if (!Number.isFinite(rowTs) || rowTs > bucketMs) break;
-        lastReading = rows[cursor];
-        cursor += 1;
-      }
-
-      const lastTs = lastReading ? toMillis(lastReading.timestamp) : Number.NaN;
-      const hasValue = Boolean(
-        lastReading &&
-        Number.isFinite(lastTs) &&
-        lastTs >= observedStartMs,
-      );
-
-      points.push({
-        timestamp,
-        value: hasValue && typeof lastReading?.vwc === 'number' ? round(lastReading.vwc, 1) : null,
-        actualValue: null,
-        rawMoisture: null,
-        predicted: false,
-        humidity: hasValue && typeof lastReading?.rh === 'number' ? round(lastReading.rh, 1) : null,
-        temperature: hasValue && typeof lastReading?.t_air === 'number' ? round(lastReading.t_air, 1) : null,
-        rainFlag: hasValue && typeof lastReading?.rain_flag === 'boolean' ? lastReading.rain_flag : null,
-        online: hasValue && Number.isFinite(lastTs) ? (bucketMs - lastTs <= STEP_HOURS * HOUR_MS * 2) : false,
-        confidence: null,
-      });
-    }
-
-    observedByNode.set(nodeId, points);
-    latestObservedByNode.set(
-      nodeId,
-      [...points].reverse().find((point) => point.value !== null) ?? null,
-    );
-  }
-
-  const clusterPredictionValue = typeof prediction?.predicted_vwc_tomorrow === 'number'
-    ? round(clamp(prediction.predicted_vwc_tomorrow, 0, 100), 1)
-    : null;
-  const predictionConfidencePct = prediction
-    ? round(clamp(prediction.confidence * 100, 0, 100), 1)
-    : null;
-  const latestClusterAverage = average(
-    Array.from(latestObservedByNode.values()).map((point) => point?.value),
-    2,
-  );
-  const forecastTimestamp = new Date(anchorMs + FORECAST_HOURS * HOUR_MS).toISOString();
-
-  return nodeIds.map((nodeId, index) => {
-    const observedPoints = observedByNode.get(nodeId) ?? [];
-    const latestObservedPoint = latestObservedByNode.get(nodeId) ?? null;
-
-    let forecastValue: number | null = null;
-    if (
-      clusterPredictionValue !== null &&
-      latestObservedPoint !== null &&
-      latestObservedPoint.value !== null &&
-      latestClusterAverage !== null
-    ) {
-      const nodeOffset = latestObservedPoint.value - latestClusterAverage;
-      forecastValue = round(clamp(clusterPredictionValue + nodeOffset, 0, 100), 1);
-    } else if (clusterPredictionValue !== null) {
-      forecastValue = clusterPredictionValue;
-    }
-
-    const predictedPoint: PredictionPoint = {
-      timestamp: forecastTimestamp,
-      value: forecastValue,
-      actualValue: null,
-      rawMoisture: null,
-      predicted: true,
-      humidity: latestObservedPoint?.humidity ?? null,
-      temperature: latestObservedPoint?.temperature ?? null,
-      rainFlag: latestObservedPoint?.rainFlag ?? null,
-      online: false,
-      confidence: predictionConfidencePct,
-    };
-
-    return {
-      id: nodeId,
-      label: formatNodeLabel(nodeId),
-      color: colorForNode(nodeId, index),
-      points: [...observedPoints, predictedPoint],
-    };
-  });
 }
 
 function buildSeriesFromChartSplit(
@@ -491,7 +286,7 @@ function buildSeriesFromChartSplit(
 
   const trainPoints: PredictionPoint[] = chartSplit.train_history.map((row) => ({
     timestamp: row.timestamp,
-    value: typeof row.actual_vwc === 'number' ? round(row.actual_vwc, 1) : null,
+    value: typeof row.actual_vwc === 'number' ? row.actual_vwc : null,
     actualValue: null,
     rawMoisture: null,
     predicted: false,
@@ -504,8 +299,8 @@ function buildSeriesFromChartSplit(
 
   const testPoints: PredictionPoint[] = chartSplit.test_predictions.map((row) => ({
     timestamp: row.timestamp,
-    value: typeof row.predicted_vwc_tomorrow === 'number' ? round(row.predicted_vwc_tomorrow, 1) : null,
-    actualValue: typeof row.actual_vwc_next_day === 'number' ? round(row.actual_vwc_next_day, 1) : null,
+    value: typeof row.predicted_vwc_tomorrow === 'number' ? row.predicted_vwc_tomorrow : null,
+    actualValue: typeof row.actual_vwc_next_day === 'number' ? row.actual_vwc_next_day : null,
     rawMoisture: null,
     predicted: true,
     humidity: null,
@@ -566,7 +361,7 @@ export default function PredictionPage() {
       if (!backgroundRefresh) setLoading(true);
 
       try {
-        const { prediction, history, latestForCluster, chartSplit } = await fetchClusterBundle(activeCluster);
+        const { prediction, chartSplit } = await fetchClusterBundle(activeCluster);
         if (cancelled) return;
 
         const hasChartSplitData = Boolean(
@@ -574,13 +369,20 @@ export default function PredictionPage() {
           && chartSplit.train_history.length
           && chartSplit.test_predictions.length,
         );
-        const nextNodes = hasChartSplitData
-          ? buildSeriesFromChartSplit(chartSplit as PredictorChartOut, prediction)
-          : buildSeriesFromBackend(history, latestForCluster, prediction);
+
+        if (!hasChartSplitData) {
+          const sourceHint = USE_FAKE_PREDICTOR_DATA
+            ? `Static snapshot is missing chart_by_cluster data for ${activeCluster}.`
+            : `Chart endpoint did not return train/test rows for ${activeCluster}.`;
+
+          throw new Error(`${sourceHint} This view requires /api/v1/predictions/chart/{cluster_id}.`);
+        }
+
+        const nextNodes = buildSeriesFromChartSplit(chartSplit as PredictorChartOut, prediction);
 
         setClusterNodes(nextNodes);
         setActivePrediction(prediction);
-        setActiveChartSplit(hasChartSplitData ? chartSplit : null);
+        setActiveChartSplit(chartSplit as PredictorChartOut);
         setLoadError(null);
         setLastLoadedAt(new Date().toISOString());
 
@@ -649,7 +451,9 @@ export default function PredictionPage() {
       for (const node of clusterNodes) {
         const point = node.points[idx] ?? emptyPoint(basePoint.timestamp);
         const predictedStartIdx = predictedStartByNode.get(node.id) ?? -1;
-        const predictedBridgeStart = predictedStartIdx >= 0 ? Math.max(0, predictedStartIdx - 1) : -1;
+        const predictedBridgeStart = predictedStartIdx >= 0
+          ? (usingTrainTestSplit ? predictedStartIdx : Math.max(0, predictedStartIdx - 1))
+          : -1;
 
         row[`${node.id}Observed`] = point.predicted ? null : point.value;
         row[`${node.id}Predicted`] = predictedBridgeStart >= 0 && idx >= predictedBridgeStart
@@ -662,7 +466,7 @@ export default function PredictionPage() {
 
       return row;
     });
-  }, [clusterNodes]);
+  }, [clusterNodes, usingTrainTestSplit]);
 
   const timelineData: TimelinePoint[] = useMemo(() => {
     if (!renderedNodes.length) return [];
@@ -741,7 +545,9 @@ export default function PredictionPage() {
   const observedCount = timelineData.filter((point) => !point.predicted).length;
   const forecastCount = timelineData.length - observedCount;
   const predictedStartIdx = timelineData.findIndex((point) => point.predicted);
-  const predictedShadeStartIdx = predictedStartIdx >= 0 ? Math.max(0, predictedStartIdx - 1) : -1;
+  const predictedShadeStartIdx = predictedStartIdx >= 0
+    ? (usingTrainTestSplit ? predictedStartIdx : Math.max(0, predictedStartIdx - 1))
+    : -1;
   const predictedShadeStartTs = predictedShadeStartIdx >= 0 ? timelineData[predictedShadeStartIdx].timestamp : null;
 
   const recentSlice = timelineData.slice(-16);
@@ -929,7 +735,7 @@ export default function PredictionPage() {
                       {renderedNodes.map((node) => (
                         <Line
                           key={`${node.id}-observed`}
-                          type="monotone"
+                          type={usingTrainTestSplit ? 'linear' : 'monotone'}
                           dataKey={`${node.id}Observed`}
                           name={`${node.label} Observed`}
                           stroke={node.color}
@@ -943,7 +749,7 @@ export default function PredictionPage() {
                       {renderedNodes.map((node) => (
                         <Line
                           key={`${node.id}-predicted`}
-                          type="monotone"
+                          type={usingTrainTestSplit ? 'linear' : 'monotone'}
                           dataKey={`${node.id}Predicted`}
                           name={`${node.label} Predicted`}
                           stroke={node.color}
@@ -958,7 +764,7 @@ export default function PredictionPage() {
                       {usingTrainTestSplit && renderedNodes.map((node) => (
                         <Line
                           key={`${node.id}-actual`}
-                          type="monotone"
+                          type="linear"
                           dataKey={`${node.id}Actual`}
                           name={`${node.label} Actual`}
                           stroke="#2d7a4f"
