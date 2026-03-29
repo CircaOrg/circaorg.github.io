@@ -10,6 +10,7 @@ import {
   FiServer,
   FiTarget,
   FiTrash2,
+  FiSettings,
 } from 'react-icons/fi';
 import { useFieldStore } from '../lib/socket';
 import type { BaseStation, Node } from '../lib/socket';
@@ -26,7 +27,7 @@ import FieldCanvas from '../components/FieldCanvas';
 import StatsPanel from '../components/StatsPanel';
 import './ConfigurePage.css';
 
-type ConfigureTab = 'field' | 'devices';
+type ConfigureTab = 'field' | 'devices' | 'advanced';
 
 const CROP_TYPES = ['wheat', 'corn', 'cotton', 'rice', 'other'];
 
@@ -75,16 +76,56 @@ export default function ConfigurePage() {
           active={activeTab === 'devices'}
           onClick={() => setActiveTab('devices')}
         />
+        <TabBtn
+          id="tab-advanced"
+          label="Advanced Settings"
+          Icon={FiSettings}
+          active={activeTab === 'advanced'}
+          onClick={() => setActiveTab('advanced')}
+        />
         <div
           className="configure-tab-indicator"
-          style={{ '--idx': activeTab === 'field' ? 0 : 1 } as React.CSSProperties}
+          style={{ '--idx': activeTab === 'field' ? 0 : activeTab === 'devices' ? 1 : 2 } as React.CSSProperties}
         />
       </div>
 
       <div className="configure-tab-body fade-in" key={activeTab}>
         {activeTab === 'field' && <FieldShapeEditor />}
         {activeTab === 'devices' && <DevicesTab />}
+        {activeTab === 'advanced' && <AdvancedTab />}
       </div>
+    </div>
+  );
+}
+
+// ─── Advanced Settings tab ────────────────────────────────────────────────────
+
+function AdvancedTab() {
+  const useViam = useHardwareStore((s) => s.useViam);
+  const setUseViam = useHardwareStore((s) => s.setUseViam);
+
+  return (
+    <div className="configure-devices-body" style={{ padding: '2rem' }}>
+      <div className="configure-side-header">
+        <span className="configure-side-kicker mono">Advanced Control Settings</span>
+      </div>
+      <div style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <label className="label" style={{ fontSize: '1.2rem', marginBottom: 0 }}>
+          Use Viam Robotics API
+        </label>
+        <label className="switch">
+          <input
+            type="checkbox"
+            checked={useViam}
+            onChange={(e) => setUseViam(e.target.checked)}
+          />
+          <span className="slider round"></span>
+        </label>
+      </div>
+      <p className="configure-field-hint" style={{ marginTop: '1rem', maxWidth: '600px' }}>
+        When enabled, hardware communication is routed through Viam's secure WebRTC infrastructure using the @viamrobotics/sdk. 
+        When disabled, the dashboard falls back to direct HTTP fetch requests to the ESP32 (legacy firmware).
+      </p>
     </div>
   );
 }
