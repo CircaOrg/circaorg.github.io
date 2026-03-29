@@ -5,7 +5,7 @@
  */
 import { useEffect, useMemo, useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { useFieldStore } from '../lib/socket';
 import type { BaseStation, Node } from '../lib/socket';
@@ -14,7 +14,6 @@ import {
   DEFAULT_FIELD_POLYGON,
   DEFAULT_NODE_IRRIGATION_RADIUS_M,
   DEFAULT_TURRET_THROW_RADIUS_M,
-  FIELD_GRID_CELL_METERS,
   isSimplePolygon,
   polygonBoundingBox,
   polygonPointFromNormalized,
@@ -90,54 +89,20 @@ function moistureCol(pct: number | undefined): string {
   return '#12e877';
 }
 
-// ─── shaders ──────────────────────────────────────────────────────────────────
 
-const GROUND_VS = /* glsl */ `
-varying vec3 vWorldPos;
-void main() {
-  vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-}`;
-
-// Light editorial ground — near-white base, visible gray grid lines
-const GROUND_FS = /* glsl */ `
-uniform float uTime;
-uniform float uCell;
-varying vec3 vWorldPos;
-void main() {
-  vec2 xz = vWorldPos.xz;
-  vec2 g = fract(xz / uCell);
-  float edge = min(min(g.x, 1.0 - g.x), min(g.y, 1.0 - g.y));
-  float line = 1.0 - smoothstep(0.0, 0.05, edge);
-  vec3 base = vec3(0.975, 0.972, 0.965);
-  vec3 ink  = vec3(0.38,  0.36,  0.32);
-  float breathe = sin(uTime * 0.35 + xz.x * 0.08)
-                * sin(uTime * 0.28 + xz.y * 0.07) * 0.010;
-  vec3 col = mix(base, ink, line * 0.62);
-  col += breathe;
-  gl_FragColor = vec4(col, 1.0);
-}`;
-
-// ─── FieldGround ──────────────────────────────────────────────────────────────
 
 function FieldGround({ vertices }: { vertices: FieldPolygon }) {
   const geo = useMemo(() => buildFieldGroundGeometry(vertices, 2), [vertices]);
   useEffect(() => () => geo.dispose(), [geo]);
-  const matRef = useRef<THREE.ShaderMaterial>(null);
-  const uniforms = useMemo(
-    () => ({ uTime: { value: 0 }, uCell: { value: FIELD_GRID_CELL_METERS } }),
-    [],
-  );
-  useFrame(({ clock }) => {
-    if (matRef.current) matRef.current.uniforms.uTime.value = clock.elapsedTime;
-  });
+
   return (
-    <mesh geometry={geo} receiveShadow>
-      <shaderMaterial
-        ref={matRef}
-        uniforms={uniforms}
-        vertexShader={GROUND_VS}
-        fragmentShader={GROUND_FS}
+    <mesh geometry={geo} receiveShadow position={[0, -0.01, 0]}>
+      <meshStandardMaterial
+        color="#81c784"
+        transparent
+        opacity={0.4}
+        roughness={0.8}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -146,23 +111,25 @@ function FieldGround({ vertices }: { vertices: FieldPolygon }) {
 // ─── FieldBorder3D ─────────────────────────────────────────────────────────────
 
 function FieldBorder3D({ vertices }: { vertices: FieldPolygon }) {
-  const geo = useMemo(() => {
-    const g = new THREE.BufferGeometry();
-    const n = vertices.length;
-    const pos = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      pos[i * 3] = vertices[i].x;
-      pos[i * 3 + 1] = 0.08;
-      pos[i * 3 + 2] = vertices[i].z;
+  const points = useMemo(() => {
+    const pts = [];
+    for (let i = 0; i < vertices.length; i++) {
+      pts.push([vertices[i].x, 0.08, vertices[i].z] as [number, number, number]);
     }
-    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    return g;
+    if (pts.length > 0) {
+      pts.push([vertices[0].x, 0.08, vertices[0].z] as [number, number, number]); // close the loop
+    }
+    return pts;
   }, [vertices]);
-  useEffect(() => () => geo.dispose(), [geo]);
+
   return (
-    <lineLoop geometry={geo}>
-      <lineBasicMaterial color="#c4972a" transparent opacity={0.75} />
-    </lineLoop>
+    <Line
+      points={points}
+      color="#c4972a"
+      lineWidth={4}
+      transparent
+      opacity={0.85}
+    />
   );
 }
 

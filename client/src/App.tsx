@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import ConfigurePage from './pages/ConfigurePage';
 import ControlPage from './pages/ControlPage';
 import PredictionPage from './pages/PredictionPage';
+import IrrigationControlPage from './pages/IrrigationControlPage';
 import './App.css';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/irrigate"  element={<IrrigationControlPage />} />
           <Route path="/configure" element={<ConfigurePage />} />
           <Route path="/pair"      element={<Navigate to="/configure" replace />} />
           <Route path="/control"   element={<ControlPage />} />

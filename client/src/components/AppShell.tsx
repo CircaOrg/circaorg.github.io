@@ -1,11 +1,12 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import type { IconType } from 'react-icons';
-import { FiGrid, FiSettings, FiSliders, FiTrendingUp } from 'react-icons/fi';
+import { FiGrid, FiSettings, FiSliders, FiTrendingUp, FiDroplet } from 'react-icons/fi';
 import CircaLogo from './CircaLogo';
 import './AppShell.css';
 
 const NAV = [
   { to: '/dashboard', icon: FiGrid,     label: 'Dashboard' },
+  { to: '/irrigate',  icon: FiDroplet,  label: 'Irrigate'  },
   { to: '/configure', icon: FiSettings, label: 'Configure' },
   { to: '/control',   icon: FiSliders,    label: 'Control' },
   { to: '/prediction', icon: FiTrendingUp, label: 'Prediction' },

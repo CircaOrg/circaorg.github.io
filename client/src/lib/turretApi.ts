@@ -112,9 +112,11 @@ export class TurretApiClient {
     return this.call('/api/aim', { x: x.toFixed(4), y: y.toFixed(4), speed: Math.round(speed) });
   }
 
-  /** Turn pump relay on (stays on until pumpOff is called). */
-  pumpOn(): Promise<HardwareResult> {
-    return this.call('/api/pump/on');
+  /** Turn pump relay on. Pass durationMs to auto-stop; omit for manual control. */
+  pumpOn(durationMs?: number): Promise<HardwareResult> {
+    return durationMs && durationMs > 0
+      ? this.call('/api/pump/on', { duration: durationMs })
+      : this.call('/api/pump/on');
   }
 
   /** Turn pump relay off. */
