@@ -132,6 +132,51 @@ const STEP_HOURS = 3;
 const FORECAST_HOURS = 24;
 const POLL_INTERVAL_MS = 30_000;
 const PREDICTOR_BASE_URL = (import.meta.env.VITE_PREDICTOR_URL || 'http://localhost:8000').replace(/\/+$/, '');
+const USE_FAKE_PREDICTOR_DATA = (import.meta.env.VITE_USE_FAKE_PREDICTOR_DATA || 'false').toLowerCase() === 'true';
+
+interface FakeClusterConfig {
+  crop: string;
+  baseVwc: number;
+  criticalVwc: number;
+  trendPerStep: number;
+  nodeCount: number;
+  baseTemp: number;
+  baseHumidity: number;
+  confidence: number;
+}
+
+const FAKE_CLUSTER_CONFIG: Record<ClusterId, FakeClusterConfig> = {
+  cluster_1: {
+    crop: 'Tomatoes',
+    baseVwc: 41.5,
+    criticalVwc: 25,
+    trendPerStep: -0.18,
+    nodeCount: 3,
+    baseTemp: 24.4,
+    baseHumidity: 61,
+    confidence: 0.91,
+  },
+  cluster_2: {
+    crop: 'Lettuce',
+    baseVwc: 35.2,
+    criticalVwc: 30,
+    trendPerStep: -0.14,
+    nodeCount: 4,
+    baseTemp: 22.8,
+    baseHumidity: 68,
+    confidence: 0.87,
+  },
+  cluster_3: {
+    crop: 'Corn',
+    baseVwc: 28.9,
+    criticalVwc: 20,
+    trendPerStep: -0.22,
+    nodeCount: 3,
+    baseTemp: 26.1,
+    baseHumidity: 54,
+    confidence: 0.84,
+  },
+};
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -220,11 +265,115 @@ async function fetchPredictionForCluster(clusterId: ClusterId): Promise<Predicto
   );
 }
 
+function buildFakeClusterBundle(clusterId: ClusterId): {
+  prediction: PredictorPredictionOut;
+  history: PredictorSensorReadingOut[];
+  latestForCluster: PredictorSensorReadingOut[];
+} {
+  const now = Date.now();
+  const cfg = FAKE_CLUSTER_CONFIG[clusterId];
+
+  const history: PredictorSensorReadingOut[] = [];
+  const latestForCluster: PredictorSensorReadingOut[] = [];
+  const latestNodeValues: number[] = [];
+
+  for (let nodeIndex = 0; nodeIndex < cfg.nodeCount; nodeIndex += 1) {
+    const nodeId = `${clusterId}_node_${nodeIndex + 1}`;
+    const nodeOffset = (nodeIndex - (cfg.nodeCount - 1) / 2) * 1.2;
+
+    for (let step = 0; step < OBSERVED_COUNT; step += 1) {
+      const timestampMs = now - (OBSERVED_COUNT - 1 - step) * STEP_HOURS * HOUR_MS;
+      const seasonalWave = Math.sin((step + nodeIndex * 1.7) / 3.1) * 1.15;
+      const microWave = Math.cos((step + nodeIndex * 0.6) / 5.4) * 0.6;
+      const vwc = clamp(
+        cfg.baseVwc + nodeOffset + cfg.trendPerStep * step + seasonalWave + microWave,
+        2,
+        95,
+      );
+
+      const humidity = clamp(
+        cfg.baseHumidity + Math.sin((step + nodeIndex) / 5.3) * 5.5,
+        15,
+        100,
+      );
+
+      const temperature = cfg.baseTemp + Math.cos((step + nodeIndex * 0.8) / 4.6) * 2.4;
+      const rainFlag = clusterId === 'cluster_1'
+        ? step % 9 === 0
+        : clusterId === 'cluster_2'
+          ? step % 15 === 0
+          : false;
+
+      const reading: PredictorSensorReadingOut = {
+        id: `${clusterId}-${nodeId}-${step}`,
+        timestamp: new Date(timestampMs).toISOString(),
+        cluster_id: clusterId,
+        node_id: nodeId,
+        base_station_id: `base_${clusterId.replace('cluster_', '')}`,
+        vwc: round(vwc, 2),
+        rh: round(humidity, 2),
+        t_air: round(temperature, 2),
+        rain_flag: rainFlag,
+      };
+
+      history.push(reading);
+
+      if (step === OBSERVED_COUNT - 1) {
+        latestNodeValues.push(reading.vwc ?? 0);
+        latestForCluster.push({
+          ...reading,
+          id: `${reading.id}-latest`,
+          timestamp: new Date(now - nodeIndex * 2 * 60_000).toISOString(),
+        });
+      }
+    }
+  }
+
+  const currentVwc = average(latestNodeValues, 2);
+  const projectedSteps = FORECAST_HOURS / STEP_HOURS;
+  const predictedVwc = currentVwc !== null
+    ? round(clamp(currentVwc + cfg.trendPerStep * projectedSteps, 0, 100), 2)
+    : null;
+
+  let timeToCritical: number | null = null;
+  if (currentVwc !== null && predictedVwc !== null) {
+    const dailyDrop = currentVwc - predictedVwc;
+    if (dailyDrop > 0) {
+      timeToCritical = round(Math.max(0, (currentVwc - cfg.criticalVwc) / dailyDrop), 2);
+    }
+  }
+
+  const prediction: PredictorPredictionOut = {
+    cluster_id: clusterId,
+    crop: cfg.crop,
+    timestamp: new Date(now).toISOString(),
+    predicted_vwc_tomorrow: predictedVwc,
+    current_vwc: currentVwc,
+    time_to_critical_days: timeToCritical,
+    critical_threshold: cfg.criticalVwc,
+    confidence: cfg.confidence,
+    irrigation_recommended: predictedVwc !== null ? predictedVwc < cfg.criticalVwc : false,
+    top_drivers: {
+      current_vwc: currentVwc ?? 0,
+      delta_vwc_per_day: round(cfg.trendPerStep * (24 / STEP_HOURS), 3),
+      weather_rain_prob_12h: clusterId === 'cluster_1' ? 0.42 : clusterId === 'cluster_2' ? 0.21 : 0.08,
+    },
+    model_version: `simulated_${clusterId}_v1`,
+    fallback_used: false,
+  };
+
+  return { prediction, history, latestForCluster };
+}
+
 async function fetchClusterBundle(clusterId: ClusterId): Promise<{
   prediction: PredictorPredictionOut;
   history: PredictorSensorReadingOut[];
   latestForCluster: PredictorSensorReadingOut[];
 }> {
+  if (USE_FAKE_PREDICTOR_DATA) {
+    return buildFakeClusterBundle(clusterId);
+  }
+
   const now = new Date();
   const start = new Date(now.getTime() - OBSERVED_COUNT * STEP_HOURS * HOUR_MS * 2);
 
@@ -618,7 +767,7 @@ export default function PredictionPage() {
               ? 'Loading predictor data...'
               : loadError
                 ? loadError
-                : `Source: ${PREDICTOR_BASE_URL}${lastLoadedAt ? ` | Updated ${formatTime(lastLoadedAt)}` : ''}`}
+                : `Source: ${USE_FAKE_PREDICTOR_DATA ? 'Simulated Data Mode' : PREDICTOR_BASE_URL}${lastLoadedAt ? ` | Updated ${formatTime(lastLoadedAt)}` : ''}`}
           </p>
         </div>
 
