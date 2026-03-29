@@ -1,9 +1,8 @@
-import { io, Socket } from 'socket.io-client';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { IS_STATIC_DEPLOYMENT, SOCKET_SERVER_URL } from './runtimeConfig';
 
 // ─── Types ──────────────────────────────────────────────────────
+
 export interface SensorReading {
   entityType: 'station' | 'node';
   entityId: string;
@@ -22,7 +21,6 @@ export interface BaseStation {
   humidity?: number;
   temperature?: number;
   soil_moisture?: number;
-  /** Max reach of the turret stream from this base (meters); firmware can use for aiming limits. */
   turret_range_m?: number;
 }
 
@@ -35,7 +33,6 @@ export interface Node {
   crop_type: string;
   online: boolean;
   soil_moisture?: number;
-  /** Radius of intended irrigation / spray catchment at this target (meters). */
   irrigation_radius_m?: number;
 }
 
@@ -53,6 +50,7 @@ export interface FieldStore {
 }
 
 // ─── Zustand store (persisted to localStorage) ───────────────────
+
 export const useFieldStore = create<FieldStore>()(
   persist(
     (set) => ({
@@ -103,7 +101,6 @@ export const useFieldStore = create<FieldStore>()(
     }),
     {
       name: 'circa-field-store',
-      // Don't persist transient socket state; reset online status on rehydration
       partialize: (s) => ({ stations: s.stations, nodes: s.nodes }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -114,32 +111,3 @@ export const useFieldStore = create<FieldStore>()(
     },
   ),
 );
-
-// ─── Socket singleton ────────────────────────────────────────────
-let socket: Socket | null = null;
-
-export function connectSocket() {
-  if (IS_STATIC_DEPLOYMENT) {
-    useFieldStore.getState().setConnected(false);
-    return null;
-  }
-
-  if (socket?.connected) return socket;
-
-  socket = io(SOCKET_SERVER_URL, { transports: ['websocket'] });
-
-  const store = useFieldStore.getState();
-
-  socket.on('connect', () => store.setConnected(true));
-  socket.on('disconnect', () => store.setConnected(false));
-
-  socket.on('sensor_update', ({ payload }: { topic: string; payload: SensorReading; timestamp: string }) => {
-    store.applyReading({ ...payload, timestamp: new Date().toISOString() });
-  });
-
-  return socket;
-}
-
-export function sendTurretCommand(stationId: string, angle: number, duration: number) {
-  socket?.emit('turret_command', { stationId, angle, duration, action: 'fire' });
-}

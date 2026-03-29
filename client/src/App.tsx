@@ -1,7 +1,5 @@
-import { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { connectSocket } from './lib/socket';
-import { useSimulatedData } from './hooks/useSimulatedData'; // ← TEMP: remove to restore real data
+import { useSimulatedData } from './hooks/useSimulatedData'; // ← remove to disable demo data
 import AppShell from './components/AppShell';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
@@ -9,13 +7,11 @@ import ConfigurePage from './pages/ConfigurePage';
 import ControlPage from './pages/ControlPage';
 import PredictionPage from './pages/PredictionPage';
 import IrrigationControlPage from './pages/IrrigationControlPage';
+import SchedulerPage from './pages/SchedulerPage';
 import './App.css';
 
 export default function App() {
-  useSimulatedData(); // ← TEMP: comment out to restore real data
-  useEffect(() => {
-    connectSocket();
-  }, []);
+  useSimulatedData(); // ← remove to disable demo data
 
   return (
     <HashRouter>
@@ -23,8 +19,9 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/irrigate"  element={<IrrigationControlPage />} />
-          <Route path="/configure" element={<ConfigurePage />} />
+          <Route path="/irrigate"   element={<IrrigationControlPage />} />
+          <Route path="/scheduler"  element={<SchedulerPage />} />
+          <Route path="/configure"  element={<ConfigurePage />} />
           <Route path="/pair"      element={<Navigate to="/configure" replace />} />
           <Route path="/control"   element={<ControlPage />} />
           <Route path="/prediction" element={<PredictionPage />} />

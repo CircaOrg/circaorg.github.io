@@ -28,50 +28,23 @@ export interface NodeReading {
 
 /**
  * Client for the ESP32 turret HTTP API.
- *
- * Two modes:
- *  - Proxy mode (default): routes through the Circa server's proxy endpoint so
- *    the browser never makes a cross-origin request. Use when the Mac is on the
- *    same network as the ESP32 and the server can reach it.
- *  - Direct mode: calls the ESP32 URL directly from the browser. Use when the
- *    phone is connected to Turret-ESP32 Wi-Fi — the ESP32 serves CORS headers
- *    so the browser can reach it without any proxy.
+ * Calls the ESP32 directly from the browser — connect to Turret-ESP32 Wi-Fi first.
  */
 export class TurretApiClient {
-  private proxyBase: string;
   private hardwareUrl: string;
-  private direct: boolean;
 
-  /**
-   * @param hardwareUrl  Base URL of the ESP32, e.g. "http://192.168.4.1"
-   * @param proxyBase    Base URL of the Circa server, e.g. "http://localhost:3001"
-   * @param direct       If true, call ESP32 directly (no proxy). Use on phone.
-   */
-  constructor(hardwareUrl: string, proxyBase: string, direct = false) {
+  /** @param hardwareUrl  Base URL of the ESP32, e.g. "http://192.168.4.1" */
+  constructor(hardwareUrl = 'http://192.168.4.1') {
     this.hardwareUrl = hardwareUrl.replace(/\/$/, '');
-    this.proxyBase   = proxyBase.replace(/\/$/, '');
-    this.direct      = direct;
   }
 
   private async call(path: string, params: Record<string, string | number> = {}): Promise<HardwareResult> {
-    const esp32Url = new URL(this.hardwareUrl + path);
+    const url = new URL(this.hardwareUrl + path);
     for (const [k, v] of Object.entries(params)) {
-      esp32Url.searchParams.set(k, String(v));
+      url.searchParams.set(k, String(v));
     }
-
-    let fetchUrl: string;
-    if (this.direct) {
-      // Phone on Turret-ESP32 Wi-Fi — call ESP32 directly (CORS headers present)
-      fetchUrl = esp32Url.toString();
-    } else {
-      // Mac on eduroam — route through server proxy to avoid CORS
-      const proxyUrl = new URL(`${this.proxyBase}/api/control/hardware/proxy`);
-      proxyUrl.searchParams.set('target', esp32Url.toString());
-      fetchUrl = proxyUrl.toString();
-    }
-
     try {
-      const res = await fetch(fetchUrl);
+      const res = await fetch(url.toString());
       const body = await res.text();
       return { ok: res.ok, status: res.status, body };
     } catch (err: any) {

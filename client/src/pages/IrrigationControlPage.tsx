@@ -12,7 +12,7 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useFieldStore } from '../lib/socket';
 import { useHardwareStore } from '../lib/hardwareStore';
-import { IS_STATIC_DEPLOYMENT, SOCKET_SERVER_URL } from '../lib/runtimeConfig';
+import { IS_STATIC_DEPLOYMENT } from '../lib/runtimeConfig';
 import { TurretApiClient } from '../lib/turretApi';
 import { IrrigationFieldView, type PlotCell } from '../components/IrrigationFieldView';
 import {
@@ -29,8 +29,6 @@ import {
 } from '../lib/irrigationTargeting';
 import { polygonPointFromNormalized, DEFAULT_FIELD_POLYGON } from '../lib/fieldShape';
 import './IrrigationControlPage.css';
-
-const SERVER = SOCKET_SERVER_URL;
 
 // ─── Move delay helper ──────────────────────────────────────────────────────────
 // How long to wait for the turret to physically slew to a new position (ms).
@@ -152,7 +150,7 @@ export default function IrrigationControlPage() {
     setFiring(true);
     setLastResult(null);
 
-    const client = new TurretApiClient(hardwareStore.getUrl(station.id), SERVER, true);
+    const client = new TurretApiClient(hardwareStore.getUrl(station.id));
 
     try {
       await aimAt(client, singleAngles.panDeg, singleAngles.tiltDeg);
@@ -194,7 +192,7 @@ export default function IrrigationControlPage() {
     setSweepActiveIndex(0);
     setSweepProgress({ done: 0, total: sweepPlan.waypoints.length });
 
-    const client = new TurretApiClient(hardwareStore.getUrl(station.id), SERVER, true);
+    const client = new TurretApiClient(hardwareStore.getUrl(station.id));
 
     try {
       for (let i = 0; i < sweepPlan.waypoints.length; i++) {
@@ -267,7 +265,7 @@ export default function IrrigationControlPage() {
     setArcActiveIndex(0);
     setSweepProgress({ done: 0, total: arcPlan.waypoints.length });
 
-    const client = new TurretApiClient(hardwareStore.getUrl(station.id), SERVER, true);
+    const client = new TurretApiClient(hardwareStore.getUrl(station.id));
 
     try {
       for (let i = 0; i < arcPlan.waypoints.length; i++) {

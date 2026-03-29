@@ -9,6 +9,19 @@
   max-width: 100%;
 }
 
+.app-shell.chat-open {
+  grid-template-columns: minmax(12.5rem, 13.75rem) 300px 1fr;
+}
+
+/* ── Chat panel column ───────────────────────────────── */
+.chat-panel {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  border-right: 1px solid var(--gray-200);
+  animation: slideInChat 0.22s var(--ease-out) both;
+}
+
 /* ── Sidebar ─────────────────────────────────────── */
 .sidebar {
   --sidebar-item-pad-x: 18px;
@@ -131,6 +144,46 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.3;
+}
+
+/* ── AI toggle area ──────────────────────────────────── */
+.sidebar-ai-toggle-area {
+  margin-top: auto;
+  border-top: 1px solid var(--gray-200);
+}
+
+.sidebar-ai-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-top: none; /* already handled by area */
+  justify-content: flex-start;
+}
+
+.sidebar-ai-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background: var(--black);
+  color: var(--white);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.sidebar-ai-btn.active .sidebar-ai-badge {
+  background: var(--brown);
+}
+
+/* ── Chat panel slide-in ─────────────────────────────── */
+@keyframes slideInChat {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* Live status — mono stamp */
@@ -267,11 +320,16 @@
 }
 
 @media (max-width: 720px) {
-  .app-shell {
+  .app-shell,
+  .app-shell.chat-open {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     height: auto;
     min-height: 100dvh;
+  }
+
+  .chat-panel {
+    display: none; /* on mobile the chat panel is hidden (full-screen modal instead) */
   }
 
   .sidebar {
