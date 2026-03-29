@@ -83,7 +83,7 @@ static int findOrAllocNode(const char *mac) {
   return -1; // full — replace oldest
 }
 
-// ESP-NOW receive callback — called from WiFi task, not an ISR
+// ESP-NOW receive callback
 void onNodeReceive(const uint8_t *mac, const uint8_t *data, int len) {
   if (len < (int)sizeof(NodePacket)) return;
 
