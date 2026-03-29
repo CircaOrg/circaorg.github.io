@@ -1,12 +1,12 @@
 .circa-logo {
   display: inline-flex;
   align-items: center;
-  gap: -4px;
+  vertical-align: middle;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1;
   color: currentColor;
-  margin-right: -4px;
+  margin: 0;
 }
 
 .circa-logo svg {
