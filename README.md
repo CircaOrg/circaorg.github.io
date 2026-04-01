@@ -6,20 +6,20 @@ Real-time field monitoring and irrigation control for ESP32-based turret systems
 
 ```
 ESP32 Base Stations / Nodes
-        │ MQTT publish
+        │ ESP-NOW → Base Station
+        │ HTTP API (192.168.4.1)
         ▼
-Mosquitto Broker (port 1883)
-        │ subscribe
-        ▼
-Node.js Server (port 3001) ──WebSocket──► React Frontend (port 5173)
-        │
-        ▼
-   Supabase DB (persistence)
+React Frontend (port 5173)
+  └─ Direct HTTP calls to ESP32
+  └─ localStorage for state persistence
+  └─ Mosquitto MQTT (optional, for multi-station deployments)
 ```
 
 ## Quick Start
 
-### 1. Start the MQTT Broker
+### 1. Start the MQTT Broker (optional)
+
+Only needed for multi-station setups where sensors report over WiFi/MQTT.
 
 ```bash
 docker compose up -d
@@ -30,31 +30,13 @@ docker compose up -d
 ### 2. Configure Environment Variables
 
 ```bash
-# Server
-cp server/.env.example server/.env
-# Fill in: SUPABASE_URL, SUPABASE_ANON_KEY, MQTT_BROKER=mqtt://localhost:1883
-
-# Frontend
 cp client/.env.example client/.env
-# Fill in: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_SOCKET_URL=http://localhost:3001, VITE_PREDICTOR_URL=http://localhost:8000
-# Optional: VITE_GEMINI_API_KEY (for AI chat)
+# Fill in: VITE_OPENROUTER_API_KEY (for AI assistant)
+#          VITE_ELEVENLABS_API_KEY (for voice output)
+#          VITE_ELEVENLABS_VOICE_ID (optional, defaults to a preset voice)
 ```
 
-### 3. Set Up Supabase
-
-1. Create a project at [supabase.com](https://supabase.com)
-2. Go to SQL Editor and run `supabase/schema.sql`
-3. Copy Project URL + anon key into your `.env` files
-
-### 4. Start the Backend
-
-```bash
-cd server
-npm install
-npm run dev
-```
-
-### 5. Start the Frontend
+### 3. Start the Frontend
 
 ```bash
 cd client
@@ -63,6 +45,8 @@ npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173)
+
+> The app runs fully in the browser. Connect to the `Turret-ESP32` Wi-Fi hotspot to control hardware directly.
 
 ---
 
@@ -76,22 +60,22 @@ Open [http://localhost:5173](http://localhost:5173)
 - **ESP32Servo**
 - **ArduinoJson**
 
-### Flash a Base Station
+### Flash the Turret Station
 
-1. Open `firmware/base_station/base_station.ino` in Arduino IDE
+1. Open `firmware/turret_station/` in PlatformIO (or use Arduino IDE with `base_station/base_station.ino`)
 2. Edit `firmware/config.h`:
    - Set `WIFI_SSID`, `WIFI_PASSWORD`
-   - Set `MQTT_BROKER` to your machine's local IP
    - Set `DEVICE_ID` to e.g. `"station-001"`
    - Verify pin assignments match your wiring
-3. Select **ESP32 Dev Module** board
-4. Flash!
+3. Select **ESP32 Dev Module** and flash
 
-### Flash a Node
+The turret station runs as a Wi-Fi SoftAP (`Turret-ESP32`, IP `192.168.4.1`) and serves an HTTP API on port 80.
 
-1. Open `firmware/node/node.ino`
+### Flash a Sensor Node
+
+1. Open `firmware/node/` in PlatformIO
 2. Edit `config.h` with a unique `DEVICE_ID` (e.g. `"node-001"`)
-3. Flash!
+3. Flash — nodes use ESP-NOW to report moisture data to the base station
 
 ### Wire the Base Station
 
@@ -106,9 +90,9 @@ Open [http://localhost:5173](http://localhost:5173)
 
 ## Pairing a Device
 
-1. In the dashboard, go to **Pair** → **Add Device**
+1. In the dashboard, go to **Configure** → **Add Device**
 2. Enter the same `DEVICE_ID` you set in `config.h`
-3. Enter the physical field coordinates (0–1 normalized)
+3. Enter the physical field coordinates (0–1 normalized) or click on the field map
 4. Power on the ESP32 — it will appear online in the field view
 
 ---
@@ -138,3 +122,5 @@ mosquitto_pub -h localhost -t "circa/station/station-001/temperature" -m '{"valu
 # Simulate soil moisture
 mosquitto_pub -h localhost -t "circa/node/node-001/soil_moisture" -m '{"value":35.0}'
 ```
+
+The frontend also has a built-in simulated data mode for demo/offline use — set `IS_STATIC_DEPLOYMENT = true` in `client/src/lib/runtimeConfig.ts`.

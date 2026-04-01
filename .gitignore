@@ -30,3 +30,8 @@ server/data/stations.json
 # Logs
 *.log
 npm-debug.log*
+
+# Temp / scratch files
+*.txt
+tmp*
+status*
